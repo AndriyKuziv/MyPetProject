@@ -6,29 +6,58 @@ namespace MyPetProject.Repositories
 {
     public class ProductRepository : IProductRepository
     {
+        private readonly MyDBContext _dbContext;
+
+        public ProductRepository(MyDBContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+
         public async Task<IEnumerable<Product>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _dbContext.Product.ToListAsync();
         }
 
         public async Task<Product> GetAsync(Guid id)
         {
-            throw new NotImplementedException();
+            return await _dbContext.Product.FirstOrDefaultAsync(pr => pr.Id == id);
         }
 
         public async Task<Product> AddAsync(Product product)
         {
-            throw new NotImplementedException();
+            product.Id = Guid.NewGuid();
+
+            await _dbContext.AddAsync(product);
+            await _dbContext.SaveChangesAsync();
+
+            return product;
         }
 
         public async Task<Product> DeleteAsync(Guid id)
         {
-            throw new NotImplementedException();
+            var product = await _dbContext.Product.FirstOrDefaultAsync(pr => pr.Id == id);
+
+            if (product is null) return null;
+
+            _dbContext.Remove(product);
+            await _dbContext.SaveChangesAsync();
+
+            return product;
         }
 
         public async Task<Product> UpdateAsync(Guid id, Product product)
         {
-            throw new NotImplementedException();
+            var existingProduct = await _dbContext.Product.FirstOrDefaultAsync(pr => pr.Id == id);
+
+            if (existingProduct is null) return null;
+
+            existingProduct.Name = product.Name;
+            existingProduct.Price = product.Price;
+            existingProduct.ProductTypeId = product.ProductTypeId;
+            
+            await _dbContext.SaveChangesAsync();
+
+            return existingProduct;
         }
     }
 }
