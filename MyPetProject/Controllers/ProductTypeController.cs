@@ -26,7 +26,7 @@ namespace MyPetProject.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllProductTypes()
         {
-            var productTypes = _productTypeRepository.GetAllAsync();
+            var productTypes = await _productTypeRepository.GetAllAsync();
 
             var productTypesDTO = _mapper.Map<List<Models.DTO.ProductType>>(productTypes);
 
@@ -34,7 +34,7 @@ namespace MyPetProject.Controllers
         }
 
         [HttpGet]
-        [Route("id:guid")]
+        [Route("{id:guid}")]
         [ActionName("GetProductType")]
         public async Task<IActionResult> GetProductType(Guid id)
         {
@@ -76,11 +76,22 @@ namespace MyPetProject.Controllers
         }
 
         [HttpPut]
-        [Route("id:guid")]
+        [Route("{id:guid}")]
         public async Task<IActionResult> UpdateProductType([FromRoute] Guid id, 
             [FromBody] Models.DTO.UpdateProductTypeRequest updateProductTypeRequest)
         {
-            throw new NotImplementedException();
+            var product = new Models.Domain.ProductType()
+            {
+                Name = updateProductTypeRequest.Name
+            };
+
+            var updatedProductType = await _productTypeRepository.UpdateAsync(id, product);
+
+            if (updatedProductType is null) return NotFound();
+
+            var productTypeDTO = _mapper.Map<Models.DTO.ProductType>(updatedProductType);
+
+            return Ok(productTypeDTO);
         }
     }
 }

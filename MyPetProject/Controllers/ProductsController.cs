@@ -34,7 +34,7 @@ namespace MyPetProject.Controllers
         }
 
         [HttpGet]
-        [Route("id:guid")]
+        [Route("{id:guid}")]
         [ActionName("GetProduct")]
         public async Task<IActionResult> GetProduct(Guid id)
         {

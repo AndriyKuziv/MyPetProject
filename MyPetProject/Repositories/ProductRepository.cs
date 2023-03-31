@@ -15,12 +15,16 @@ namespace MyPetProject.Repositories
 
         public async Task<IEnumerable<Product>> GetAllAsync()
         {
-            return await _dbContext.Product.ToListAsync();
+            return await _dbContext.Product
+                .Include(x => x.ProductType)
+                .ToListAsync();
         }
 
         public async Task<Product> GetAsync(Guid id)
         {
-            return await _dbContext.Product.FirstOrDefaultAsync(pr => pr.Id == id);
+            return await _dbContext.Product
+                .Include(x => x.ProductType)
+                .FirstOrDefaultAsync(pr => pr.Id == id);
         }
 
         public async Task<Product> AddAsync(Product product)
