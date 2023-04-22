@@ -11,6 +11,7 @@ namespace MyPetProject.Data
         public DbSet<ProductType> ProductType { get; set; }
 
         public DbSet<Order> Order { get; set; }
+        public DbSet<Order_Products> Order_Products { get; set; }
         public DbSet<OrderStatus> OrderStatus { get; set; }
 
         public DbSet<User> User { get; set; }

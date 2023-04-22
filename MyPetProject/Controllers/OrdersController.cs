@@ -47,9 +47,19 @@ namespace MyPetProject.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddOrder()
+        public async Task<IActionResult> AddOrder(Models.DTO.AddOrderRequest addOrderRequest)
         {
-            throw new NotImplementedException();
+            var order = new Models.Domain.Order()
+            {
+                OrderStatusId = addOrderRequest.OrderStatusId,
+                UserId = addOrderRequest.UserId
+            };
+
+            order = await _orderRepository.AddAsync(order);
+
+            var orderDTO = _mapper.Map<Models.DTO.Order>(order);
+
+            return Ok(orderDTO);
         }
 
         [HttpDelete]
@@ -67,9 +77,55 @@ namespace MyPetProject.Controllers
 
         [HttpPut]
         [Route("{id:guid}")]
-        public async Task<IActionResult> UpdateOrder(Guid id)
+        public async Task<IActionResult> UpdateOrder([FromRoute]Guid id, 
+            [FromBody] Models.DTO.UpdateOrderRequest updateOrderRequest)
         {
-            throw new NotImplementedException();
+            var order = new Models.Domain.Order()
+            {
+                OrderStatusId = updateOrderRequest.OrderStatusId
+            };
+ 
+            order = await _orderRepository.UpdateAsync(id, order);
+
+            if (order is null) return NotFound();
+
+            var orderDTO = _mapper.Map<Models.DTO.Order>(order);
+
+            return Ok(orderDTO);
+        }
+
+        [HttpPost]
+        [Route("{orderId:guid}")]
+        public async Task<IActionResult> AddProductToOrder([FromRoute] Guid orderId, 
+            [FromBody] AddOrderProductRequest addOrderProductRequest)
+        {
+            var orderProduct = new Models.Domain.Order_Products()
+            {
+                OrderId = orderId,
+                ProductId = addOrderProductRequest.productId,
+                ProductCount = addOrderProductRequest.ProductCount
+            };
+
+            orderProduct = await _orderRepository.AddProductsAsync(orderId, orderProduct);
+            
+            if (orderProduct is null) return NotFound();
+
+            var orderProductDTO = _mapper.Map<Models.DTO.Order_Products>(orderProduct);
+
+            return Ok(orderProductDTO);
+        }
+
+        [HttpDelete]
+        [Route("{orderId:guid}/{productId:guid}")]
+        public async Task<IActionResult> DeleteProductFromOrder([FromRoute] Guid orderId, [FromRoute] Guid productId)
+        {
+            var orderProduct = await _orderRepository.RemoveProductsAsync(orderId, productId);
+
+            if(orderProduct is null) return NotFound();
+
+            var orderProductDTO = _mapper.Map<Models.DTO.Order_Products>(orderProduct);
+
+            return Ok(orderProductDTO);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using MyPetProject.Data;
 using MyPetProject.Models.Domain;
 using Microsoft.EntityFrameworkCore;
+using static Azure.Core.HttpHeader;
 
 namespace MyPetProject.Repositories
 {
@@ -25,6 +26,14 @@ namespace MyPetProject.Repositories
             return await _dbContext.Product
                 .Include(x => x.ProductType)
                 .FirstOrDefaultAsync(pr => pr.Id == id);
+        }
+
+        public async Task<IEnumerable<Product>> GetByNameAsync(string name)
+        {
+            return await _dbContext.Product
+            .Include(x => x.ProductType)
+            .Where(pr => pr.Name.ToLowerInvariant().Contains(name.ToLowerInvariant()))
+            .ToListAsync();
         }
 
         public async Task<Product> AddAsync(Product product)

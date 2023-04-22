@@ -7,7 +7,9 @@ namespace MyPetProject.Repositories
         Task<IEnumerable<Product>> GetAllAsync();
         
         Task<Product> GetAsync(Guid id);
-        
+        Task<IEnumerable<Product>> GetByNameAsync(string name);
+
+
         Task<Product> AddAsync(Product product);
         
         Task<Product> DeleteAsync(Guid id);

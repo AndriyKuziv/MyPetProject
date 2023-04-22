@@ -13,5 +13,9 @@ namespace MyPetProject.Repositories
         Task<Order> DeleteAsync(Guid id);
 
         Task<Order> UpdateAsync(Guid id, Order order);
+
+        Task<Order_Products> AddProductsAsync(Guid orderId, Order_Products newOrderProduct);
+
+        Task<Order_Products> RemoveProductsAsync(Guid orderId, Guid productId);
     }
 }

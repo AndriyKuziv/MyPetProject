@@ -36,7 +36,7 @@ namespace MyPetProject.Controllers
         [HttpGet]
         [Route("{id:guid}")]
         [ActionName("GetProduct")]
-        public async Task<IActionResult> GetProduct(Guid id)
+        public async Task<IActionResult> GetProductById(Guid id)
         {
             var product = await _productRepository.GetAsync(id);
 
@@ -45,6 +45,20 @@ namespace MyPetProject.Controllers
             var productDTO = _mapper.Map<Models.DTO.Product>(product);
 
             return Ok(productDTO);
+        }
+
+        [HttpGet]
+        [Route("{name:alpha}")]
+        [ActionName("GetProductByName")]
+        public async Task<IActionResult> GetProductByName([FromRoute]string name)
+        {
+            var products = await _productRepository.GetByNameAsync(name);
+
+            if (products is null || products.Count() == 0) return NotFound();
+
+            var productsDTO = _mapper.Map<List<Models.DTO.Product>>(products);
+
+            return Ok(productsDTO);
         }
 
         [HttpPost]

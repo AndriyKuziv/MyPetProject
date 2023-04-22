@@ -50,13 +50,48 @@ namespace MyPetProject.Repositories
 
             if (existingOrder is null) return null;
 
-            existingOrder.ProductId = order.ProductId;
             existingOrder.OrderStatusId = order.OrderStatusId;
-            existingOrder.UserId = order.UserId;
+            // existingOrder.UserId = order.UserId != null ? order.UserId: existingOrder.UserId;
 
             await _dbContext.SaveChangesAsync();
 
             return existingOrder;
+        }
+
+        public async Task<Order_Products> AddProductsAsync(Guid orderId, 
+            Order_Products newOrderProduct)
+        {
+            var order = await _dbContext.Order.FirstOrDefaultAsync(or => or.Id == orderId);
+            if (order is null) return null;
+
+            var product = await _dbContext.Product
+                .FirstOrDefaultAsync(pr => pr.Id == newOrderProduct.ProductId);
+            if (product is null) return null;
+
+            var orderProduct = new Order_Products()
+            {
+                Id = Guid.NewGuid(),
+                OrderId = orderId,
+                ProductId = newOrderProduct.ProductId,
+                ProductCount = newOrderProduct.ProductCount
+            };
+
+            await _dbContext.AddAsync(orderProduct);
+            await _dbContext.SaveChangesAsync();
+
+            return orderProduct;
+        }
+
+        public async Task<Order_Products> RemoveProductsAsync(Guid orderId, Guid productId)
+        {
+            var orderProduct = await _dbContext.Order_Products
+                .FirstOrDefaultAsync(op => op.ProductId == productId && op.OrderId == orderId);
+            if (orderProduct is null) return null;
+
+            _dbContext.Remove(orderProduct);
+            await _dbContext.SaveChangesAsync();
+
+            return orderProduct;
         }
     }
 }
