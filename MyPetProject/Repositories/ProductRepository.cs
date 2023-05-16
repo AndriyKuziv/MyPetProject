@@ -32,8 +32,8 @@ namespace MyPetProject.Repositories
         {
             return await _dbContext.Product
             .Include(x => x.ProductType)
-            .Where(pr => pr.Name.ToLowerInvariant().Contains(name.ToLowerInvariant()))
-            .ToListAsync();
+            .Where(pr => pr.Name.ToLower().Contains(name.ToLowerInvariant()))
+             .ToListAsync();
         }
 
         public async Task<Product> AddAsync(Product product)
