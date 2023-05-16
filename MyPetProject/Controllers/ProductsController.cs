@@ -36,7 +36,7 @@ namespace MyPetProject.Controllers
         [HttpGet]
         [Route("{id:guid}")]
         [ActionName("GetProduct")]
-        public async Task<IActionResult> GetProductById(Guid id)
+        public async Task<IActionResult> GetProductById([FromRoute]Guid id)
         {
             var product = await _productRepository.GetAsync(id);
 
