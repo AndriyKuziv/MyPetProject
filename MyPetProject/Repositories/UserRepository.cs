@@ -17,21 +17,18 @@ namespace MyPetProject.Repositories
         public async Task<IEnumerable<User>> GetAllAsync()
         {
             return await _dbContext.User
-                .Include(x => x.Roles)
                 .ToListAsync();
         }
 
         public async Task<User> GetAsync(Guid id)
         {
             return await _dbContext.User
-                .Include(x => x.Roles)
                 .FirstOrDefaultAsync(user => user.Id == id);
         }
 
         public async Task<IEnumerable<User>> GetByNameAsync(string name)
         {
             return await _dbContext.User
-                .Include(x => x.Roles)
                 .Where(user => user.Username.ToLower().Contains(name.ToLowerInvariant()))
                 .ToListAsync();
         }
