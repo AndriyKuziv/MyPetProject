@@ -1,15 +1,13 @@
-﻿namespace MyPetProject.Models.DTO
+﻿namespace MyPetProject.Models.Domain
 {
-    public class Order_Products
+    public class OrderProduct
     {
         public Guid Id { get; set; }
         public Guid OrderId { get; set; }
         public Guid ProductId { get; set; }
         public int ProductCount { get; set; }
 
-        //Navigation properties
-
-        public Order Order { get; set; }
+        // Navigation property
         public Product Product { get; set; }
     }
 }

@@ -8,6 +8,8 @@ namespace MyPetProject.Profiles
         {
             CreateMap<Models.Domain.Order, Models.DTO.Order>()
                 .ReverseMap();
+            CreateMap<Models.Domain.OrderProduct, Models.DTO.OrderProduct>()
+                .ReverseMap();
         }
     }
 }

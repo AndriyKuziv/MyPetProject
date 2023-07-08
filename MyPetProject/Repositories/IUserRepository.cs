@@ -8,7 +8,7 @@ namespace MyPetProject.Repositories
 
         Task<User> GetAsync(Guid id);
 
-        Task<IEnumerable<User>> GetByNameAsync(string name);
+        Task<User> GetByNameAsync(string name);
 
         Task<User> AuthenticateAsync(string username, string password);
 

@@ -48,7 +48,7 @@ namespace MyPetProject.Controllers
 
         [HttpGet]
         [Route("{name:alpha}")]
-        public async Task<IActionResult> GetUserByName(string name)
+        public async Task<IActionResult> GetUserByName([FromRoute]string name)
         {
             var user = await _userRepository.GetByNameAsync(name);
 
@@ -72,6 +72,7 @@ namespace MyPetProject.Controllers
             };
 
             user = await _userRepository.AddAsync(user);
+
 
             var userDTO = _mapper.Map<Models.DTO.User>(user);
 

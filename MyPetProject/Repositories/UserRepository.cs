@@ -26,20 +26,39 @@ namespace MyPetProject.Repositories
                 .FirstOrDefaultAsync(user => user.Id == id);
         }
 
-        public async Task<IEnumerable<User>> GetByNameAsync(string name)
+        // does not work by unknown reason
+        public async Task<User> GetByNameAsync(string name)
         {
             return await _dbContext.User
-                .Where(user => user.Username.ToLower().Contains(name.ToLowerInvariant()))
-                .ToListAsync();
+                .FirstOrDefaultAsync(user => user.Username == name);
         }
 
         public async Task<User> AddAsync(User user)
         {
             user.Id = Guid.NewGuid();
 
+            // adding new user to database
             await _dbContext.AddAsync(user);
-            await _dbContext.SaveChangesAsync();
 
+            // add user status to new user
+            string defaultRole = "user";
+            Role dbRole = await _dbContext.Role.FirstOrDefaultAsync(role => role.Name == defaultRole);
+
+            if (dbRole is null)
+            {
+                throw new Exception("There is no 'user' role in database.");
+            }
+
+            User_Role user_Role = new User_Role()
+            {
+                Id = Guid.NewGuid(),
+                UserId = user.Id,
+                RoleId = dbRole.Id
+            };
+
+            await _dbContext.UserRole.AddAsync(user_Role);
+            await _dbContext.SaveChangesAsync();
+            
             return user;
         }
 

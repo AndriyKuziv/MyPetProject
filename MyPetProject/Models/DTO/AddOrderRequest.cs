@@ -1,8 +1,9 @@
-﻿namespace MyPetProject.Models.DTO
+﻿using MyPetProject.Profiles;
+
+namespace MyPetProject.Models.DTO
 {
     public class AddOrderRequest
     {
-        public Guid UserId { get; set; }
-        public Guid OrderStatusId { get; set; }
+        public List<OrderProduct> OrderProducts { get; set; }
     }
 }

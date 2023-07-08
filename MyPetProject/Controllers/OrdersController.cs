@@ -39,11 +39,34 @@ namespace MyPetProject.Controllers
         {
             var order = await _orderRepository.GetAsync(id);
 
-            if (order is null) return NotFound();
+            if (order is null)
+            {
+                return NotFound();
+            }
+
+            var orderProducts = await _orderRepository.GetOrderProductsAsync(id);
+
+            order.OrderProducts = (List<Models.Domain.OrderProduct>)orderProducts;
 
             var orderDTO = _mapper.Map<Models.DTO.Order>(order);
 
             return Ok(orderDTO);
+        }
+
+        [HttpGet]
+        [Route("{id:guid}/products")]
+        public async Task<IActionResult> GetOrderProducts(Guid id)
+        {
+            var orderProducts = await _orderRepository.GetOrderProductsAsync(id);
+
+            if (orderProducts is null)
+            {
+                return NotFound();
+            }
+
+            var orderProductsDTO = _mapper.Map<List<Models.DTO.OrderProduct>>(orderProducts);
+
+            return Ok(orderProductsDTO);
         }
 
         [HttpPost]
@@ -51,8 +74,8 @@ namespace MyPetProject.Controllers
         {
             var order = new Models.Domain.Order()
             {
-                OrderStatusId = addOrderRequest.OrderStatusId,
-                UserId = addOrderRequest.UserId
+                OrderProducts = _mapper.Map<List<Models.Domain.OrderProduct>>(addOrderRequest.OrderProducts),
+                UserId = new Guid("D2ABC02B-4785-4B7E-9C03-6741F8CECD12")
             };
 
             order = await _orderRepository.AddAsync(order);
@@ -68,26 +91,10 @@ namespace MyPetProject.Controllers
         {
             var order = await _orderRepository.DeleteAsync(id);
 
-            if (order is null) return NotFound();
-
-            var orderDTO = _mapper.Map<Models.DTO.Order>(order);
-
-            return Ok(orderDTO);
-        }
-
-        [HttpPut]
-        [Route("{id:guid}")]
-        public async Task<IActionResult> UpdateOrder([FromRoute]Guid id, 
-            [FromBody] Models.DTO.UpdateOrderRequest updateOrderRequest)
-        {
-            var order = new Models.Domain.Order()
+            if (order is null)
             {
-                OrderStatusId = updateOrderRequest.OrderStatusId
-            };
- 
-            order = await _orderRepository.UpdateAsync(id, order);
-
-            if (order is null) return NotFound();
+                return NotFound();
+            }
 
             var orderDTO = _mapper.Map<Models.DTO.Order>(order);
 
@@ -96,36 +103,16 @@ namespace MyPetProject.Controllers
 
         [HttpPost]
         [Route("{orderId:guid}")]
-        public async Task<IActionResult> AddProductToOrder([FromRoute] Guid orderId, 
-            [FromBody] AddOrderProductRequest addOrderProductRequest)
+        public async Task<IActionResult> AddProductToOrder([FromRoute] Guid orderId)
         {
-            var orderProduct = new Models.Domain.Order_Products()
-            {
-                OrderId = orderId,
-                ProductId = addOrderProductRequest.productId,
-                ProductCount = addOrderProductRequest.ProductCount
-            };
-
-            orderProduct = await _orderRepository.AddProductsAsync(orderId, orderProduct);
-            
-            if (orderProduct is null) return NotFound();
-
-            var orderProductDTO = _mapper.Map<Models.DTO.Order_Products>(orderProduct);
-
-            return Ok(orderProductDTO);
+            throw new NotImplementedException();
         }
 
         [HttpDelete]
         [Route("{orderId:guid}/{productId:guid}")]
-        public async Task<IActionResult> DeleteProductFromOrder([FromRoute] Guid orderId, [FromRoute] Guid productId)
+        public async Task<IActionResult> DeleteProductFromOrder()
         {
-            var orderProduct = await _orderRepository.RemoveProductsAsync(orderId, productId);
-
-            if(orderProduct is null) return NotFound();
-
-            var orderProductDTO = _mapper.Map<Models.DTO.Order_Products>(orderProduct);
-
-            return Ok(orderProductDTO);
+            throw new NotImplementedException();
         }
     }
 }

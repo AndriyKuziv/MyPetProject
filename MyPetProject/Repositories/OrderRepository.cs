@@ -15,18 +15,54 @@ namespace MyPetProject.Repositories
 
         public async Task<IEnumerable<Order>> GetAllAsync()
         {
-            return await _dbContext.Order.ToListAsync();
+            return await _dbContext.Order
+                .Include(x => x.User)
+                .Include(x => x.OrderStatus)
+                .Include(x => x.Products)
+                .ToListAsync();
         }
 
         public async Task<Order> GetAsync(Guid id)
         {
-            return await _dbContext.Order.FirstOrDefaultAsync(or => or.Id == id);
+            return await _dbContext.Order
+                .Include(x => x.User)
+                .Include(x => x.OrderStatus)
+                .Include(x => x.Products)
+                .FirstOrDefaultAsync(or => or.Id == id);
         }
+
+        public async Task<IEnumerable<OrderProduct>> GetOrderProductsAsync(Guid id)
+        {
+            return await _dbContext.OrderProduct
+                .Where(op => op.OrderId == id)
+                .Include(x => x.Product)
+                .ToListAsync();
+        }
+        
         public async Task<Order> AddAsync(Order order)
         {
             order.Id = Guid.NewGuid();
 
+            // add default status to the order
+            var defaultStatus = "Pending";
+            var orderStatus = await _dbContext.OrderStatus.FirstOrDefaultAsync(os => os.Name == defaultStatus);
+
+            if (orderStatus is null)
+            {
+                throw new Exception("Default order status is not existing.");
+            }
+
+            order.OrderStatusId = orderStatus.Id;
+
             await _dbContext.AddAsync(order);
+
+            foreach(var product in order.OrderProducts)
+            {
+                product.Id = Guid.NewGuid();
+                product.OrderId = order.Id;
+                await _dbContext.AddAsync(product);
+            }
+
             await _dbContext.SaveChangesAsync();
 
             return order;
@@ -36,7 +72,10 @@ namespace MyPetProject.Repositories
         {
             var order = await _dbContext.Order.FirstOrDefaultAsync(or => or.Id == id);
 
-            if (order is null) return null;
+            if (order is null)
+            {
+                return null;
+            }
 
             _dbContext.Remove(order);
             await _dbContext.SaveChangesAsync();
@@ -44,54 +83,8 @@ namespace MyPetProject.Repositories
             return order;
         }
 
-        public async Task<Order> UpdateAsync(Guid id, Order order)
-        {
-            var existingOrder = await _dbContext.Order.FirstOrDefaultAsync(or => or.Id == id);
+        // Add new product
 
-            if (existingOrder is null) return null;
-
-            existingOrder.OrderStatusId = order.OrderStatusId;
-            // existingOrder.UserId = order.UserId != null ? order.UserId: existingOrder.UserId;
-
-            await _dbContext.SaveChangesAsync();
-
-            return existingOrder;
-        }
-
-        public async Task<Order_Products> AddProductsAsync(Guid orderId, 
-            Order_Products newOrderProduct)
-        {
-            var order = await _dbContext.Order.FirstOrDefaultAsync(or => or.Id == orderId);
-            if (order is null) return null;
-
-            var product = await _dbContext.Product
-                .FirstOrDefaultAsync(pr => pr.Id == newOrderProduct.ProductId);
-            if (product is null) return null;
-
-            var orderProduct = new Order_Products()
-            {
-                Id = Guid.NewGuid(),
-                OrderId = orderId,
-                ProductId = newOrderProduct.ProductId,
-                ProductCount = newOrderProduct.ProductCount
-            };
-
-            await _dbContext.AddAsync(orderProduct);
-            await _dbContext.SaveChangesAsync();
-
-            return orderProduct;
-        }
-
-        public async Task<Order_Products> RemoveProductsAsync(Guid orderId, Guid productId)
-        {
-            var orderProduct = await _dbContext.Order_Products
-                .FirstOrDefaultAsync(op => op.ProductId == productId && op.OrderId == orderId);
-            if (orderProduct is null) return null;
-
-            _dbContext.Remove(orderProduct);
-            await _dbContext.SaveChangesAsync();
-
-            return orderProduct;
-        }
+        // Remove product
     }
 }
