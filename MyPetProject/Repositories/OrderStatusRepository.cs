@@ -22,6 +22,12 @@ namespace MyPetProject.Repositories
         {
             return await _dbContext.OrderStatus.FirstOrDefaultAsync(os => os.Id == id);
         }
+
+        public async Task<OrderStatus> GetByNameAsync(string statusName)
+        {
+            return await _dbContext.OrderStatus.FirstOrDefaultAsync(os => os.Name == statusName);
+        }
+
         public async Task<OrderStatus> AddAsync(OrderStatus orderStatus)
         {
             orderStatus.Id = Guid.NewGuid();

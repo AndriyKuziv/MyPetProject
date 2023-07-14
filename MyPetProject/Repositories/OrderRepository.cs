@@ -43,7 +43,7 @@ namespace MyPetProject.Repositories
         {
             order.Id = Guid.NewGuid();
 
-            // add default status to the order
+            // adds default status to the order
             var defaultStatus = "Pending";
             var orderStatus = await _dbContext.OrderStatus.FirstOrDefaultAsync(os => os.Name == defaultStatus);
 
@@ -78,6 +78,26 @@ namespace MyPetProject.Repositories
             }
 
             _dbContext.Remove(order);
+            await _dbContext.SaveChangesAsync();
+
+            return order;
+        }
+
+        public async Task<Order> UpdateOrderStatus(Guid OrderId, string statusName)
+        {
+            var order = await GetAsync(OrderId);
+            if (order is null)
+            {
+                return null;
+            }
+
+            var newOrderStatus = await _dbContext.OrderStatus.FirstOrDefaultAsync(os => os.Name == statusName);
+            if (newOrderStatus is null)
+            {
+                return null;
+            }
+
+            order.OrderStatusId = newOrderStatus.Id;
             await _dbContext.SaveChangesAsync();
 
             return order;

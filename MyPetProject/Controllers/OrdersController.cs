@@ -35,7 +35,7 @@ namespace MyPetProject.Controllers
 
         [HttpGet]
         [Route("{id:guid}")]
-        public async Task<IActionResult> GetOrder(Guid id)
+        public async Task<IActionResult> GetOrder([FromRoute] Guid id)
         {
             var order = await _orderRepository.GetAsync(id);
 
@@ -55,7 +55,7 @@ namespace MyPetProject.Controllers
 
         [HttpGet]
         [Route("{id:guid}/products")]
-        public async Task<IActionResult> GetOrderProducts(Guid id)
+        public async Task<IActionResult> GetOrderProducts([FromRoute]Guid id)
         {
             var orderProducts = await _orderRepository.GetOrderProductsAsync(id);
 
@@ -70,7 +70,7 @@ namespace MyPetProject.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddOrder(Models.DTO.AddOrderRequest addOrderRequest)
+        public async Task<IActionResult> AddOrder([FromBody]Models.DTO.AddOrderRequest addOrderRequest)
         {
             var order = new Models.Domain.Order()
             {
@@ -87,7 +87,7 @@ namespace MyPetProject.Controllers
 
         [HttpDelete]
         [Route("{id:guid}")]
-        public async Task<IActionResult> DeleteOrder(Guid id)
+        public async Task<IActionResult> DeleteOrder([FromRoute]Guid id)
         {
             var order = await _orderRepository.DeleteAsync(id);
 

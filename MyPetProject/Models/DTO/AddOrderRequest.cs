@@ -4,6 +4,6 @@ namespace MyPetProject.Models.DTO
 {
     public class AddOrderRequest
     {
-        public List<OrderProduct> OrderProducts { get; set; }
+        public List<AddOrderProductRequest> OrderProducts { get; set; }
     }
 }

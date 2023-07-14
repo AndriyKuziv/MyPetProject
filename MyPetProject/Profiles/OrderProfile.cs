@@ -10,6 +10,8 @@ namespace MyPetProject.Profiles
                 .ReverseMap();
             CreateMap<Models.Domain.OrderProduct, Models.DTO.OrderProduct>()
                 .ReverseMap();
+            CreateMap<Models.Domain.OrderProduct, Models.DTO.AddOrderProductRequest>()
+                .ReverseMap();
         }
     }
 }
