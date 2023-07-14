@@ -1,10 +1,5 @@
 # MyPetProject
-
-1. Clone a repository
-2. To add database, in VS open NuGet console and enter "Update-Database"
-
-Also, for now, for proper work of the application, you have to insert some data to database manually. 
-Here is the code you will need to execute:
+For now, for proper work of the application, you have to insert some data to database manually. Here is the code you will need to execute:
 1. Order statuses:
 ```
 insert into [ShopDb].[dbo].[OrderStatus] (Id, Name)
