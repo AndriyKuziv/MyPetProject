@@ -7,42 +7,45 @@ namespace MyPetProject.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly MyDBContext _dbContext;
+        private readonly MyDBContext dbContext;
 
         public UserRepository(MyDBContext dbContext)
         {
-            _dbContext = dbContext;
+            this.dbContext = dbContext;
         }
 
+        // Get the list of all users
         public async Task<IEnumerable<User>> GetAllAsync()
         {
-            return await _dbContext.User
+            return await dbContext.User
                 .ToListAsync();
         }
 
+        // Get user by their ID
         public async Task<User> GetAsync(Guid id)
         {
-            return await _dbContext.User
+            return await dbContext.User
                 .FirstOrDefaultAsync(user => user.Id == id);
         }
 
-        // does not work by unknown reason
+        // Get user by their name (currently not working)
         public async Task<User> GetByNameAsync(string name)
         {
-            return await _dbContext.User
+            return await dbContext.User
                 .FirstOrDefaultAsync(user => user.Username == name);
         }
 
+        // Add new user
         public async Task<User> AddAsync(User user)
         {
             user.Id = Guid.NewGuid();
 
             // adding new user to database
-            await _dbContext.AddAsync(user);
+            await this.dbContext.AddAsync(user);
 
-            // add user status to new user
+            // add "user" status to a new user
             string defaultRole = "user";
-            Role dbRole = await _dbContext.Role.FirstOrDefaultAsync(role => role.Name == defaultRole);
+            Role dbRole = await dbContext.Role.FirstOrDefaultAsync(role => role.Name == defaultRole);
 
             if (dbRole is null)
             {
@@ -56,32 +59,59 @@ namespace MyPetProject.Repositories
                 RoleId = dbRole.Id
             };
 
-            await _dbContext.UserRole.AddAsync(user_Role);
-            await _dbContext.SaveChangesAsync();
+            await dbContext.UserRole.AddAsync(user_Role);
+            await dbContext.SaveChangesAsync();
             
             return user;
         }
 
+        
         public async Task<User> AuthenticateAsync(string username, string password)
         {
-            throw new NotImplementedException();
+            var user = await dbContext.User
+                .FirstOrDefaultAsync(usr => usr.Username.ToLower() == username.ToLower() && usr.Password == password);
+
+            if (user is null)
+            {
+                return null;
+            }
+
+            var userRoles = await dbContext.UserRole.Where(ur => ur.UserId == user.Id).ToListAsync();
+
+            if (userRoles.Any())
+            {
+                user.Roles = new List<string>();
+                foreach(var userRole in userRoles)
+                {
+                    var role = await dbContext.Role.FirstOrDefaultAsync(r => r.Id == userRole.RoleId);
+                    if (role != null)
+                    {
+                        user.Roles.Add(role.Name);
+                    }
+                }
+            }
+
+            user.Password = null;
+            return user;
         }
 
+        // Delete user by their ID
         public async Task<User> DeleteAsync(Guid id)
         {
-            var user = await _dbContext.User.FirstOrDefaultAsync(user => user.Id == id);
+            var user = await dbContext.User.FirstOrDefaultAsync(user => user.Id == id);
 
             if (user is null) return null;
 
-            _dbContext.Remove(user);
-            await _dbContext.SaveChangesAsync();
+            dbContext.Remove(user);
+            await dbContext.SaveChangesAsync();
 
             return user;
         }
 
+        // Update user by their ID
         public async Task<User> UpdateAsync(Guid id, User user)
         {
-            var existingUser = await _dbContext.User.FirstOrDefaultAsync(user => user.Id == id);
+            var existingUser = await dbContext.User.FirstOrDefaultAsync(user => user.Id == id);
 
             if (existingUser is null) return null;
 
@@ -90,7 +120,7 @@ namespace MyPetProject.Repositories
             existingUser.LastName = user.LastName;
             existingUser.Email = user.Email;
 
-            await _dbContext.SaveChangesAsync();
+            await dbContext.SaveChangesAsync();
 
             return existingUser;
         }

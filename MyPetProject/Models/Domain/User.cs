@@ -15,5 +15,6 @@ namespace MyPetProject.Models.Domain
         public List<string> Roles { get; set; }
 
         // Navigation property
+        public List<User_Role> UserRoles { get; set;}
     }
 }

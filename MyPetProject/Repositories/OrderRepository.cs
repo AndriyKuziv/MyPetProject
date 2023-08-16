@@ -13,6 +13,7 @@ namespace MyPetProject.Repositories
             _dbContext = dbContext;
         }
 
+        // Get all orders
         public async Task<IEnumerable<Order>> GetAllAsync()
         {
             return await _dbContext.Order
@@ -22,6 +23,7 @@ namespace MyPetProject.Repositories
                 .ToListAsync();
         }
 
+        // Get order by its ID
         public async Task<Order> GetAsync(Guid id)
         {
             return await _dbContext.Order
@@ -31,6 +33,7 @@ namespace MyPetProject.Repositories
                 .FirstOrDefaultAsync(or => or.Id == id);
         }
 
+        // Get products that an order contains
         public async Task<IEnumerable<OrderProduct>> GetOrderProductsAsync(Guid id)
         {
             return await _dbContext.OrderProduct
@@ -39,11 +42,12 @@ namespace MyPetProject.Repositories
                 .ToListAsync();
         }
         
+        // Add a new order
         public async Task<Order> AddAsync(Order order)
         {
             order.Id = Guid.NewGuid();
 
-            // adds default status to the order
+            // adds default status to an order
             var defaultStatus = "Pending";
             var orderStatus = await _dbContext.OrderStatus.FirstOrDefaultAsync(os => os.Name == defaultStatus);
 
@@ -68,6 +72,7 @@ namespace MyPetProject.Repositories
             return order;
         }
 
+        // Delete an order
         public async Task<Order> DeleteAsync(Guid id)
         {
             var order = await _dbContext.Order.FirstOrDefaultAsync(or => or.Id == id);
@@ -83,6 +88,7 @@ namespace MyPetProject.Repositories
             return order;
         }
 
+        // Update status of an order
         public async Task<Order> UpdateOrderStatus(Guid OrderId, string statusName)
         {
             var order = await GetAsync(OrderId);

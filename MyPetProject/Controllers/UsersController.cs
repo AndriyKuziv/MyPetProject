@@ -16,14 +16,30 @@ namespace MyPetProject.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
+        private readonly ITokenHandler _tokenHandler;
 
-        public UsersController(IUserRepository userRepository, IMapper mapper)
+        public UsersController(IUserRepository userRepository, ITokenHandler tokenHandler, IMapper mapper)
         {
             _userRepository = userRepository;
             _mapper = mapper;
+            _tokenHandler = tokenHandler;
+        }
+
+        [HttpPost]
+        [Route("login")]
+        public async Task<IActionResult> LoginAsync(Models.DTO.LoginRequest loginRequest)
+        {
+            var user = await _userRepository.AuthenticateAsync(loginRequest.Username, loginRequest.Password);
+
+            if (user is null) return BadRequest("Wrong username or password.");
+
+            var token = await _tokenHandler.CreateTokenAsync(user);
+
+            return Ok(token);
         }
 
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userRepository.GetAllAsync();
@@ -35,6 +51,7 @@ namespace MyPetProject.Controllers
 
         [HttpGet]
         [Route("{id:guid}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetUserById(Guid id)
         {
             var user = await _userRepository.GetAsync(id);
@@ -48,6 +65,7 @@ namespace MyPetProject.Controllers
 
         [HttpGet]
         [Route("{name:alpha}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetUserByName([FromRoute]string name)
         {
             var user = await _userRepository.GetByNameAsync(name);
@@ -73,6 +91,7 @@ namespace MyPetProject.Controllers
 
             user = await _userRepository.AddAsync(user);
 
+            if (user is null) return NotFound();
 
             var userDTO = _mapper.Map<Models.DTO.User>(user);
 
@@ -81,6 +100,7 @@ namespace MyPetProject.Controllers
 
         [HttpDelete]
         [Route("{id:guid}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteUser([FromRoute] Guid id)
         {
             var user = await _userRepository.DeleteAsync(id);
@@ -94,6 +114,7 @@ namespace MyPetProject.Controllers
 
         [HttpPut]
         [Route("{id:guid}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateUserById([FromRoute] Guid id, 
             [FromBody] Models.DTO.UpdateUserRequest updateUserRequest)
         {

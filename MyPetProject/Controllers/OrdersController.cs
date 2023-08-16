@@ -24,6 +24,7 @@ namespace MyPetProject.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetAllOrders()
         {
             var orders = await _orderRepository.GetAllAsync();
@@ -35,6 +36,7 @@ namespace MyPetProject.Controllers
 
         [HttpGet]
         [Route("{id:guid}")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> GetOrder([FromRoute] Guid id)
         {
             var order = await _orderRepository.GetAsync(id);
@@ -55,6 +57,7 @@ namespace MyPetProject.Controllers
 
         [HttpGet]
         [Route("{id:guid}/products")]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> GetOrderProducts([FromRoute]Guid id)
         {
             var orderProducts = await _orderRepository.GetOrderProductsAsync(id);
@@ -70,6 +73,7 @@ namespace MyPetProject.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "user")]
         public async Task<IActionResult> AddOrder([FromBody]Models.DTO.AddOrderRequest addOrderRequest)
         {
             var order = new Models.Domain.Order()
@@ -87,6 +91,7 @@ namespace MyPetProject.Controllers
 
         [HttpDelete]
         [Route("{id:guid}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteOrder([FromRoute]Guid id)
         {
             var order = await _orderRepository.DeleteAsync(id);
@@ -103,6 +108,7 @@ namespace MyPetProject.Controllers
 
         [HttpPost]
         [Route("{orderId:guid}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> AddProductToOrder([FromRoute] Guid orderId)
         {
             throw new NotImplementedException();
@@ -110,6 +116,7 @@ namespace MyPetProject.Controllers
 
         [HttpDelete]
         [Route("{orderId:guid}/{productId:guid}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteProductFromOrder()
         {
             throw new NotImplementedException();

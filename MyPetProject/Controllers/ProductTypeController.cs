@@ -36,6 +36,7 @@ namespace MyPetProject.Controllers
         [HttpGet]
         [Route("{id:guid}")]
         [ActionName("GetProductType")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetProductType(Guid id)
         {
             var productType = await _productTypeRepository.GetAsync(id);
@@ -48,6 +49,7 @@ namespace MyPetProject.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> AddProductType(Models.DTO.AddProductTypeRequest addProductTypeRequest)
         {
             var productType = new Models.Domain.ProductType()
@@ -64,6 +66,7 @@ namespace MyPetProject.Controllers
 
         [HttpDelete]
         [Route("{id:guid}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteProductType(Guid id)
         {
             var productType = await _productTypeRepository.DeleteAsync(id);
@@ -77,6 +80,7 @@ namespace MyPetProject.Controllers
 
         [HttpPut]
         [Route("{id:guid}")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateProductType([FromRoute] Guid id, 
             [FromBody] Models.DTO.UpdateProductTypeRequest updateProductTypeRequest)
         {
