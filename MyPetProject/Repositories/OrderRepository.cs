@@ -17,9 +17,8 @@ namespace MyPetProject.Repositories
         public async Task<IEnumerable<Order>> GetAllAsync()
         {
             return await _dbContext.Order
-                .Include(x => x.User)
                 .Include(x => x.OrderStatus)
-                .Include(x => x.Products)
+                .Include(x => x.User)
                 .ToListAsync();
         }
 
@@ -27,10 +26,17 @@ namespace MyPetProject.Repositories
         public async Task<Order> GetAsync(Guid id)
         {
             return await _dbContext.Order
-                .Include(x => x.User)
                 .Include(x => x.OrderStatus)
-                .Include(x => x.Products)
+                .Include(x => x.User)
                 .FirstOrDefaultAsync(or => or.Id == id);
+        }
+
+        public async Task<IEnumerable<Order>> GetAllByUserAsync(Guid id)
+        {
+            return await _dbContext.Order
+                .Include(x => x.OrderStatus)
+                .Include(x => x.User)
+                .Where(order => order.UserId == id).ToListAsync();
         }
 
         // Get products that an order contains
@@ -41,7 +47,7 @@ namespace MyPetProject.Repositories
                 .Include(x => x.Product)
                 .ToListAsync();
         }
-        
+
         // Add a new order
         public async Task<Order> AddAsync(Order order)
         {
@@ -49,7 +55,7 @@ namespace MyPetProject.Repositories
 
             // adds default status to an order
             var defaultStatus = "Pending";
-            var orderStatus = await _dbContext.OrderStatus.FirstOrDefaultAsync(os => os.Name == defaultStatus);
+            var orderStatus = await _dbContext.OrderStatus.FirstOrDefaultAsync(os => os.Name.ToLower() == defaultStatus.ToLower());
 
             if (orderStatus is null)
             {
@@ -89,7 +95,7 @@ namespace MyPetProject.Repositories
         }
 
         // Update status of an order
-        public async Task<Order> UpdateOrderStatus(Guid OrderId, string statusName)
+        public async Task<Order> UpdateOrderStatusAsync(Guid OrderId, string statusName)
         {
             var order = await GetAsync(OrderId);
             if (order is null)
@@ -97,7 +103,7 @@ namespace MyPetProject.Repositories
                 return null;
             }
 
-            var newOrderStatus = await _dbContext.OrderStatus.FirstOrDefaultAsync(os => os.Name == statusName);
+            var newOrderStatus = await _dbContext.OrderStatus.FirstOrDefaultAsync(os => os.Name.ToLower() == statusName.ToLower());
             if (newOrderStatus is null)
             {
                 return null;

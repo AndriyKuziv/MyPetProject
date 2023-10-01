@@ -7,6 +7,9 @@ using MyPetProject.Models.DTO;
 using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
+using System.ComponentModel;
 
 namespace MyPetProject.Controllers
 {
@@ -23,6 +26,7 @@ namespace MyPetProject.Controllers
             _orderRepository = orderRepository;
         }
 
+
         [HttpGet]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> GetAllOrders()
@@ -35,18 +39,23 @@ namespace MyPetProject.Controllers
         }
 
         [HttpGet]
-        [Route("{id:guid}")]
+        [Route("{orderId:guid}")]
         [Authorize(Roles = "user")]
-        public async Task<IActionResult> GetOrder([FromRoute] Guid id)
+        public async Task<IActionResult> GetOrder([FromRoute] Guid orderId)
         {
-            var order = await _orderRepository.GetAsync(id);
+            var order = await _orderRepository.GetAsync(orderId);
 
             if (order is null)
             {
                 return NotFound();
             }
 
-            var orderProducts = await _orderRepository.GetOrderProductsAsync(id);
+            if (!await HasAccess(order.UserId.ToString()))
+            {
+                return Forbid();
+            }
+
+            var orderProducts = await _orderRepository.GetOrderProductsAsync(orderId);
 
             order.OrderProducts = (List<Models.Domain.OrderProduct>)orderProducts;
 
@@ -56,11 +65,31 @@ namespace MyPetProject.Controllers
         }
 
         [HttpGet]
-        [Route("{id:guid}/products")]
+        [Route("userOrders/{userId:guid}")]
         [Authorize(Roles = "user")]
-        public async Task<IActionResult> GetOrderProducts([FromRoute]Guid id)
+        public async Task<IActionResult> GetUserOrders([FromRoute] Guid userId)
         {
-            var orderProducts = await _orderRepository.GetOrderProductsAsync(id);
+
+        }
+
+        [HttpGet]
+        [Route("{orderId:guid}/products")]
+        [Authorize(Roles = "user")]
+        public async Task<IActionResult> GetOrderProducts([FromRoute]Guid orderId)
+        {
+            var order = await _orderRepository.GetAsync(orderId);
+
+            if (order is null)
+            {
+                return NotFound();
+            }
+
+            if (!await HasAccess(order.UserId.ToString()))
+            {
+                return Forbid();
+            }
+
+            var orderProducts = await _orderRepository.GetOrderProductsAsync(orderId);
 
             if (orderProducts is null)
             {
@@ -74,12 +103,15 @@ namespace MyPetProject.Controllers
 
         [HttpPost]
         [Authorize(Roles = "user")]
-        public async Task<IActionResult> AddOrder([FromBody]Models.DTO.AddOrderRequest addOrderRequest)
+        public async Task<IActionResult> CreateOrder([FromBody]Models.DTO.AddOrderRequest addOrderRequest)
         {
             var order = new Models.Domain.Order()
             {
+                UserId = new Guid(User.FindFirstValue(ClaimTypes.NameIdentifier)),
                 OrderProducts = _mapper.Map<List<Models.Domain.OrderProduct>>(addOrderRequest.OrderProducts),
-                UserId = new Guid("D2ABC02B-4785-4B7E-9C03-6741F8CECD12")
+                FirstName = User.FindFirstValue(ClaimTypes.Name),
+                LastName = User.FindFirstValue(ClaimTypes.Surname),
+                Address = addOrderRequest.Address
             };
 
             order = await _orderRepository.AddAsync(order);
@@ -89,12 +121,26 @@ namespace MyPetProject.Controllers
             return Ok(orderDTO);
         }
 
-        [HttpDelete]
-        [Route("{id:guid}")]
+        [HttpPut]
+        [Route("{orderId:guid}/updateStatus")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> DeleteOrder([FromRoute]Guid id)
+        public async Task<IActionResult> UpdateOrderStatus([FromRoute] Guid orderId, [FromBody] string orderStatus)
         {
-            var order = await _orderRepository.DeleteAsync(id);
+            var order = await _orderRepository.UpdateOrderStatusAsync(orderId, orderStatus);
+
+            if (order is null) return NotFound();
+
+            var orderDTO = _mapper.Map<Models.DTO.Order>(order);
+
+            return Ok(orderDTO);
+        }
+
+        [HttpDelete]
+        [Route("{orderId:guid}")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> DeleteOrder([FromRoute]Guid orderId)
+        {
+            var order = await _orderRepository.DeleteAsync(orderId);
 
             if (order is null)
             {
@@ -107,19 +153,32 @@ namespace MyPetProject.Controllers
         }
 
         [HttpPost]
-        [Route("{orderId:guid}")]
+        [Route("{orderId:guid}/addProduct")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> AddProductToOrder([FromRoute] Guid orderId)
+        public async Task<IActionResult> AddProductToOrder([FromRoute] Guid orderId, [FromBody] Guid productId)
         {
             throw new NotImplementedException();
         }
 
         [HttpDelete]
-        [Route("{orderId:guid}/{productId:guid}")]
+        [Route("{orderId:guid}/deleteProduct")]
         [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteProductFromOrder()
         {
             throw new NotImplementedException();
+        }
+
+        // Check whether the user is trying to get their own order or are they an admin
+        private async Task<bool> HasAccess(string userIdOrder)
+        {
+            var userIdJwt = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var isAdmin = User.FindAll(ClaimTypes.Role).Where(role => role.Value.ToLower() == "admin").Count() >= 1;
+            if (userIdJwt != userIdOrder && !isAdmin)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }

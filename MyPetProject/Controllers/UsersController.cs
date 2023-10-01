@@ -16,26 +16,11 @@ namespace MyPetProject.Controllers
     {
         private readonly IUserRepository _userRepository;
         private readonly IMapper _mapper;
-        private readonly ITokenHandler _tokenHandler;
 
-        public UsersController(IUserRepository userRepository, ITokenHandler tokenHandler, IMapper mapper)
+        public UsersController(IUserRepository userRepository, IMapper mapper)
         {
             _userRepository = userRepository;
             _mapper = mapper;
-            _tokenHandler = tokenHandler;
-        }
-
-        [HttpPost]
-        [Route("login")]
-        public async Task<IActionResult> LoginAsync(Models.DTO.LoginRequest loginRequest)
-        {
-            var user = await _userRepository.AuthenticateAsync(loginRequest.Username, loginRequest.Password);
-
-            if (user is null) return BadRequest("Wrong username or password.");
-
-            var token = await _tokenHandler.CreateTokenAsync(user);
-
-            return Ok(token);
         }
 
         [HttpGet]
@@ -113,9 +98,9 @@ namespace MyPetProject.Controllers
         }
 
         [HttpPut]
-        [Route("{id:guid}")]
+        [Route("{userId:guid}")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> UpdateUserById([FromRoute] Guid id, 
+        public async Task<IActionResult> UpdateUserById([FromRoute] Guid userId, 
             [FromBody] Models.DTO.UpdateUserRequest updateUserRequest)
         {
             var user = new Models.Domain.User()
@@ -126,7 +111,7 @@ namespace MyPetProject.Controllers
                 LastName = updateUserRequest.LastName
             };
 
-            user = await _userRepository.UpdateAsync(id, user);
+            user = await _userRepository.UpdateAsync(userId, user);
 
             if (user is null) return NotFound();
 

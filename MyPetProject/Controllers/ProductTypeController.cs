@@ -34,12 +34,12 @@ namespace MyPetProject.Controllers
         }
 
         [HttpGet]
-        [Route("{id:guid}")]
+        [Route("{productTypeId:guid}")]
         [ActionName("GetProductType")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> GetProductType(Guid id)
+        public async Task<IActionResult> GetProductType(Guid productTypeId)
         {
-            var productType = await _productTypeRepository.GetAsync(id);
+            var productType = await _productTypeRepository.GetAsync(productTypeId);
 
             if (productType is null) return NotFound();
 
@@ -65,11 +65,11 @@ namespace MyPetProject.Controllers
         }
 
         [HttpDelete]
-        [Route("{id:guid}")]
+        [Route("{productTypeId:guid}")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> DeleteProductType(Guid id)
+        public async Task<IActionResult> DeleteProductType(Guid productTypeId)
         {
-            var productType = await _productTypeRepository.DeleteAsync(id);
+            var productType = await _productTypeRepository.DeleteAsync(productTypeId);
 
             if (productType is null) return NotFound();
 
@@ -79,9 +79,9 @@ namespace MyPetProject.Controllers
         }
 
         [HttpPut]
-        [Route("{id:guid}")]
+        [Route("{productTypeId:guid}")]
         [Authorize(Roles = "admin")]
-        public async Task<IActionResult> UpdateProductType([FromRoute] Guid id, 
+        public async Task<IActionResult> UpdateProductType([FromRoute] Guid productTypeId, 
             [FromBody] Models.DTO.UpdateProductTypeRequest updateProductTypeRequest)
         {
             var product = new Models.Domain.ProductType()
@@ -89,7 +89,7 @@ namespace MyPetProject.Controllers
                 Name = updateProductTypeRequest.Name
             };
 
-            var updatedProductType = await _productTypeRepository.UpdateAsync(id, product);
+            var updatedProductType = await _productTypeRepository.UpdateAsync(productTypeId, product);
 
             if (updatedProductType is null) return NotFound();
 

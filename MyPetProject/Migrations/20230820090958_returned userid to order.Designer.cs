@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyPetProject.Data;
 
@@ -11,9 +12,11 @@ using MyPetProject.Data;
 namespace MyPetProject.Migrations
 {
     [DbContext(typeof(MyDBContext))]
-    partial class MyDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230820090958_returned userid to order")]
+    partial class returneduseridtoorder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

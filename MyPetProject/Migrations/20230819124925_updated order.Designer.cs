@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyPetProject.Data;
 
@@ -11,9 +12,11 @@ using MyPetProject.Data;
 namespace MyPetProject.Migrations
 {
     [DbContext(typeof(MyDBContext))]
-    partial class MyDBContextModelSnapshot : ModelSnapshot
+    [Migration("20230819124925_updated order")]
+    partial class updatedorder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,9 +44,6 @@ namespace MyPetProject.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("OrderStatusId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -100,6 +100,9 @@ namespace MyPetProject.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid?>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<double>("Price")
                         .HasColumnType("float");
 
@@ -107,6 +110,8 @@ namespace MyPetProject.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("OrderId");
 
                     b.HasIndex("ProductTypeId");
 
@@ -219,6 +224,10 @@ namespace MyPetProject.Migrations
 
             modelBuilder.Entity("MyPetProject.Models.Domain.Product", b =>
                 {
+                    b.HasOne("MyPetProject.Models.Domain.Order", null)
+                        .WithMany("Products")
+                        .HasForeignKey("OrderId");
+
                     b.HasOne("MyPetProject.Models.Domain.ProductType", "ProductType")
                         .WithMany()
                         .HasForeignKey("ProductTypeId")
@@ -245,6 +254,11 @@ namespace MyPetProject.Migrations
                     b.Navigation("Role");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MyPetProject.Models.Domain.Order", b =>
+                {
+                    b.Navigation("Products");
                 });
 
             modelBuilder.Entity("MyPetProject.Models.Domain.Role", b =>

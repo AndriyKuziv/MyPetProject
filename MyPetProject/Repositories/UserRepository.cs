@@ -65,7 +65,7 @@ namespace MyPetProject.Repositories
             return user;
         }
 
-        
+        // Authenticate a user by their user name and password
         public async Task<User> AuthenticateAsync(string username, string password)
         {
             var user = await dbContext.User

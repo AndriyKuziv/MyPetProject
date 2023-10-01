@@ -18,9 +18,10 @@ namespace MyPetProject.Repositories
         {
 
             var claims = new List<Claim>();
-            claims.Add(new Claim(ClaimTypes.GivenName, user.FirstName));
+            claims.Add(new Claim(ClaimTypes.Name, user.FirstName));
             claims.Add(new Claim(ClaimTypes.Surname, user.LastName));
             claims.Add(new Claim(ClaimTypes.Email, user.Email));
+            claims.Add(new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()));
 
             user.Roles.ForEach((role) =>
             {
